@@ -1,0 +1,2 @@
+import Link from 'next/link';
+export default function Page(){return <main className="standalone"><div className="topline"><div><p>SENTINEL • SISTEMA</p><h1>Administração</h1></div><Link className="btnlink" href="/">Voltar ao Dashboard</Link></div><section className="panel"><h2>Administração do SENTINEL</h2><p className="description">Área reservada para usuários, permissões, parâmetros da classificação Bird, taxonomias, auditoria e configurações gerais.</p></section></main>
