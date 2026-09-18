@@ -1,0 +1,2 @@
+import Link from 'next/link';
+export default function Page(){return <main className="standalone"><div className="topline"><div><p>SENTINEL • CONFIGURAÇÃO</p><h1>Cadastros</h1></div><Link className="btnlink" href="/">Voltar ao Dashboard</Link></div><section className="panel"><h2>Cadastros Operacionais</h2><p className="description">Empresas, unidades, operações, clientes, motoristas, veículos e demais dimensões utilizadas no registro e análise das ocorrências.</p></section></main>}
