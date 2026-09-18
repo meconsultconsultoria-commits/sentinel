@@ -1,0 +1,2 @@
+import{authorize,getDB}from'../../../lib/auth-server';export const runtime='nodejs';export const dynamic='force-dynamic';
+export async function GET(req:Request){const a=await authorize(req,['ADMIN']);if(a.response)return a.response;const db=getDB();const r=await db.prepare("SELECT a.id,a.occurrence_id,a.user_id,a.event,a.details,a.created_at,u.name user_name,u.email user_email FROM audit_log a LEFT JOIN users u ON u.id=a.user_id ORDER BY a.id DESC LIMIT 100").all();return Response.json(r.results)}
