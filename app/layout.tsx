@@ -1,0 +1,1 @@
+import './globals.css'; export const metadata={title:'SENTINEL | Safety & Incident Intelligence',description:'SSMA intelligence by ME Consult'}; export default function RootLayout({children}:{children:React.ReactNode}){return <html lang="pt-BR"><body>{children}</body></html>}
