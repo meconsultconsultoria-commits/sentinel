@@ -32,23 +32,30 @@ export async function hashPassword(password:string){
     const iterations=60000;
     const key=await crypto.subtle.importKey("raw",new TextEncoder().encode(password),"PBKDF2",false,["deriveBits"]);
     const bits=await crypto.subtle.deriveBits({name:"PBKDF2",hash:"SHA-256",salt,iterations},key,256);
-    return `pbkdf2${iterations}${hex(salt)}${hex(new Uint8Array(bits))}`;
+    return "pbkdf2$"+iterations+"$"+hex(salt)+"$"+hex(new Uint8Array(bits));
   }catch{
-    const digest=await sha256(hex(salt)+":"+password);
-    return `sha256${hex(salt)}${digest}`;
+    const saltHex=hex(salt),digest=await sha256(saltHex+":"+password);
+    return "sha256$"+saltHex+"$"+digest;
   }
 }
 export async function verifyPassword(password:string,stored:string){
   try{
-    const parts=stored.split("$"),kind=parts[0];
+    let parts=stored.split("$"),kind=parts[0];
+    if(parts.length===1&&stored.startsWith("pbkdf2")){
+      const rest=stored.slice(6),it=rest.slice(0,5),saltHex=rest.slice(5,37),hashHex=rest.slice(37);
+      parts=["pbkdf2",it,saltHex,hashHex];kind="pbkdf2";
+    }else if(parts.length===1&&stored.startsWith("sha256")){
+      const rest=stored.slice(6),saltHex=rest.slice(0,32),hashHex=rest.slice(32);
+      parts=["sha256",saltHex,hashHex];kind="sha256";
+    }
     if(kind==="pbkdf2"){
-      const [,it,saltHex,hashHex]=parts;
+      const [,it,saltHex,hashHex]=parts;if(!it||!saltHex||!hashHex)return false;
       const key=await crypto.subtle.importKey("raw",new TextEncoder().encode(password),"PBKDF2",false,["deriveBits"]);
       const bits=await crypto.subtle.deriveBits({name:"PBKDF2",hash:"SHA-256",salt:bytes(saltHex),iterations:Number(it)},key,256);
-      const a=new Uint8Array(bits),b=bytes(hashHex);if(a.length!==b.length)return false;let diff=0;for(let i=0;i<a.length;i++)diff|=a[i]^b[i];return diff===0;
+      const x=new Uint8Array(bits),y=bytes(hashHex);if(x.length!==y.length)return false;let diff=0;for(let i=0;i<x.length;i++)diff|=x[i]^y[i];return diff===0;
     }
     if(kind==="sha256"){
-      const [,saltHex,hashHex]=parts;
+      const [,saltHex,hashHex]=parts;if(!saltHex||!hashHex)return false;
       return (await sha256(saltHex+":"+password))===hashHex;
     }
     return false;
