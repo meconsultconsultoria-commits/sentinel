@@ -3,7 +3,7 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-type Env = { DB: D1Database };
+type Env={DB:any};
 
 const mapOccurrence = (r:any) => ({
   id:r.id, createdAt:r.created_at, date:r.date||"", time:r.time||"", company:r.company_id||"", companyName:r.company_name||"",
