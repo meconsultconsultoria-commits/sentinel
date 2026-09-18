@@ -1,0 +1,1 @@
+{"name":"sentinel","compatibility_date":"2026-09-18","pages_build_output_dir":".vercel/output/static","d1_databases":[{"binding":"DB","database_name":"sentinel-db","database_id":"REPLACE_WITH_D1_DATABASE_ID"}],"r2_buckets":[{"binding":"EVIDENCE","bucket_name":"sentinel-evidence"}]}
