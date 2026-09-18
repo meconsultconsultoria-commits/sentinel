@@ -18,3 +18,16 @@ nav a{text-decoration:none;user-select:none}.emptyviz{min-height:270px;display:f
 .userGreeting{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;margin:-6px 0 24px;padding:6px 0}
 .userGreeting span{font-size:17px;font-weight:600;color:#eef4f7;letter-spacing:.2px}
 .userGreeting small{margin-top:4px;font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold)}
+
+/* Authentication */
+.loginPage{margin:0!important;width:100%!important;max-width:none!important;min-height:100vh!important;padding:42px 20px!important;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 10%,#10283d 0,#07111b 42%,#050d15 100%)}
+.loginCard{width:min(430px,100%);background:#0a1926;border:1px solid #244054;border-radius:16px;padding:30px;box-shadow:0 28px 70px rgba(0,0,0,.28)}
+.loginBrand{display:flex;align-items:center;gap:15px;padding-bottom:22px;border-bottom:1px solid var(--line)}
+.loginLogo{width:66px;height:66px;display:grid;place-items:center;background:#081725;border:1px solid #29465c;border-radius:14px;padding:5px}
+.loginBrand b{display:block;font-size:24px;letter-spacing:3px}.loginBrand span{display:block;color:var(--gold);font-size:8px;letter-spacing:1.5px;margin-top:5px;text-transform:uppercase}
+.loginHeading{display:flex;gap:12px;align-items:flex-start;margin:24px 0 18px}.loginHeading svg{color:var(--gold);width:22px}.loginHeading h1{font-size:20px}.loginHeading p{font-size:10px;color:var(--muted);margin:6px 0 0}
+.loginForm{display:grid;gap:14px}.loginForm button{margin-top:6px;justify-content:center}.loginError{font-size:10px;color:#efb1a7;background:#321d22;border:1px solid #5e3038;border-radius:7px;padding:10px 12px}.loginLoading{text-align:center;color:var(--muted);font-size:11px;padding:34px 0}
+.loginFooter{margin-top:16px;color:#708492;font-size:10px}.loginFooter strong{color:var(--gold)}
+.sideBottom{position:absolute;left:18px;right:18px;bottom:20px}.sideBottom .by{position:static;margin:10px 0 0 12px}.logoutBtn{width:100%;justify-content:flex-start;background:transparent;color:#8fa1af;border:1px solid #223b4d;padding:9px 11px;font-size:10px}.logoutBtn:hover{color:#fff;border-color:#38566c}
+.adminUserForm{grid-template-columns:1fr 1.15fr .9fr .8fr 1fr 1fr auto}
+@media(max-width:1200px){.adminUserForm{grid-template-columns:repeat(2,1fr)}}
