@@ -6,7 +6,7 @@
     {
       "binding": "DB",
       "database_name": "sentinel-db",
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID"
+      "database_id": "b5394d02-b4b4-4d5d-93df-f70853b0ffed"
     }
   ],
   "r2_buckets": [
