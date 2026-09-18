@@ -1,0 +1,3 @@
+import{NextResponse}from'next/server';import type{NextRequest}from'next/server';
+export function middleware(req:NextRequest){const p=req.nextUrl.pathname;if(p==='/login'||p.startsWith('/api/auth')||p.startsWith('/_next')||p==='/icon.svg'||p==='/favicon.ico')return NextResponse.next();if(p.startsWith('/api/'))return NextResponse.next();if(!req.cookies.get('sentinel_session')?.value){const u=req.nextUrl.clone();u.pathname='/login';u.search='';return NextResponse.redirect(u)}return NextResponse.next()}
+export const config={matcher:['/((?!_next/static|_next/image).*)']}
