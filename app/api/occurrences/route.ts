@@ -51,3 +51,23 @@ export async function PATCH(req:Request){
   else if(p.status!==undefined)await env.DB.prepare("UPDATE occurrences SET status=?, updated_at=? WHERE id=?").bind(p.status,new Date().toISOString(),p.id).run();
   return Response.json({ok:true});
 }
+
+export async function DELETE(req:Request){
+  const {env}=getCloudflareContext() as unknown as {env:Env};
+  const id=new URL(req.url).searchParams.get("id");
+  if(!id)return Response.json({error:"id_required"},{status:400});
+  // TODO auth: this endpoint must be restricted to authenticated ADMIN users when login is enabled.
+  const found=await env.DB.prepare("SELECT id FROM occurrences WHERE id=?").bind(id).first();
+  if(!found)return Response.json({error:"not_found"},{status:404});
+  const statements=[
+    env.DB.prepare("DELETE FROM audit_log WHERE occurrence_id=?").bind(id),
+    env.DB.prepare("DELETE FROM attachments WHERE occurrence_id=?").bind(id),
+    env.DB.prepare("DELETE FROM closures WHERE occurrence_id=?").bind(id),
+    env.DB.prepare("DELETE FROM actions WHERE occurrence_id=?").bind(id),
+    env.DB.prepare("DELETE FROM investigations WHERE occurrence_id=?").bind(id),
+    env.DB.prepare("DELETE FROM third_parties WHERE occurrence_id=?").bind(id),
+    env.DB.prepare("DELETE FROM occurrences WHERE id=?").bind(id)
+  ];
+  await env.DB.batch(statements);
+  return Response.json({ok:true});
+}
