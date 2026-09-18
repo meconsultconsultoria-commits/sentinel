@@ -1,0 +1,2 @@
+import{ensureAuthSchema,getDB,getCurrentUser}from'../../../../lib/auth-server';export const runtime='nodejs';export const dynamic='force-dynamic';
+export async function GET(req:Request){const db=getDB();await ensureAuthSchema(db);const c=await db.prepare("SELECT COUNT(*) n FROM users WHERE password_hash IS NOT NULL AND password_hash<>''").first();const user=await getCurrentUser(req);return Response.json({configured:Number(c?.n||0)>0,user})}
