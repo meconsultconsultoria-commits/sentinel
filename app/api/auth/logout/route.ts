@@ -1,0 +1,1 @@
+import{clearSessionCookie,destroySession}from'../../../../lib/auth-server';export const runtime='nodejs';export const dynamic='force-dynamic';export async function POST(req:Request){await destroySession(req);return new Response(JSON.stringify({ok:true}),{headers:{'content-type':'application/json','set-cookie':clearSessionCookie()}})}
