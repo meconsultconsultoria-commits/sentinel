@@ -1,0 +1,1 @@
+import{getCurrentUser}from'../../../../lib/auth-server';export const runtime='nodejs';export const dynamic='force-dynamic';export async function GET(req:Request){const user=await getCurrentUser(req);if(!user)return Response.json({error:'unauthorized'},{status:401});return Response.json(user)}
