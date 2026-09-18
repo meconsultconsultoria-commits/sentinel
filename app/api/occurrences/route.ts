@@ -6,8 +6,8 @@ export const dynamic = "force-dynamic";
 type Env = { DB: D1Database };
 
 const mapOccurrence = (r:any) => ({
-  id:r.id, createdAt:r.created_at, date:r.date||"", time:r.time||"", company:r.company_id||"",
-  unit:r.unit_id||"", operation:r.operation||"", location:r.location||"", city:r.city||"", uf:r.uf||"",
+  id:r.id, createdAt:r.created_at, date:r.date||"", time:r.time||"", company:r.company_id||"", companyName:r.company_name||"",
+  unit:r.unit_id||"", unitName:r.unit_name||"", operation:r.operation||"", location:r.location||"", city:r.city||"", uf:r.uf||"",
   nature:r.nature||"", type:r.type||"", potential:r.potential||"", victim:r.victim?"Sim":"Não",
   materialDamage:r.material_damage?"Sim":"Não", environmentalImpact:r.environmental_impact?"Sim":"Não",
   description:r.description||"", driver:r.driver||"", document:r.document||"", plate:r.plate||"",
@@ -19,12 +19,12 @@ export async function GET(req:Request){
   const { env } = getCloudflareContext() as unknown as {env:Env};
   const url=new URL(req.url), id=url.searchParams.get("id");
   if(id){
-    const row=await env.DB.prepare("SELECT * FROM occurrences WHERE id=?").bind(id).first();
+    const row=await env.DB.prepare("SELECT o.*,c.name company_name,u.name unit_name FROM occurrences o LEFT JOIN companies c ON c.id=o.company_id LEFT JOIN units u ON u.id=o.unit_id WHERE o.id=?").bind(id).first();
     if(!row)return Response.json({error:"not_found"},{status:404});
     const third=await env.DB.prepare("SELECT * FROM third_parties WHERE occurrence_id=? ORDER BY rowid LIMIT 1").bind(id).first<any>();
     return Response.json({...mapOccurrence(row),thirdParty:!!third,thirdPartyType:third?.type||"",thirdPartyName:third?.name||"",contactName:third?.contact_name||"",phone1:third?.phone1||"",phone2:third?.phone2||"",email:third?.email||"",thirdNotes:third?.notes||""});
   }
-  const rows=await env.DB.prepare("SELECT * FROM occurrences ORDER BY created_at DESC").all();
+  const rows=await env.DB.prepare("SELECT o.*,c.name company_name,u.name unit_name FROM occurrences o LEFT JOIN companies c ON c.id=o.company_id LEFT JOIN units u ON u.id=o.unit_id ORDER BY o.created_at DESC").all();
   return Response.json(rows.results.map(mapOccurrence));
 }
 
