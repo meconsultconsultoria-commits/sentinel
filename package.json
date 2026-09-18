@@ -1,1 +1,27 @@
-{"name":"sentinel","version":"0.1.0","private":true,"scripts":{"dev":"next dev","build":"next build","start":"next start","pages:build":"npx @cloudflare/next-on-pages","pages:deploy":"npx wrangler pages deploy .vercel/output/static"},"dependencies":{"next":"15.5.2","react":"19.1.0","react-dom":"19.1.0","lucide-react":"^0.468.0"},"devDependencies":{"typescript":"^5","@types/node":"^22","@types/react":"^19","@types/react-dom":"^19","@cloudflare/next-on-pages":"^1.13.16","wrangler":"^4.135.0"}}
+{
+  "name": "sentinel",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "cf:build": "opennextjs-cloudflare build",
+    "deploy": "opennextjs-cloudflare build && wrangler deploy",
+    "preview": "opennextjs-cloudflare build && wrangler dev"
+  },
+  "dependencies": {
+    "next": "15.5.2",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "lucide-react": "^0.468.0",
+    "@opennextjs/cloudflare": "^1.11.0"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "wrangler": "^4.135.0"
+  }
+}
