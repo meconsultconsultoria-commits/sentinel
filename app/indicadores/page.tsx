@@ -1,0 +1,2 @@
+import Link from 'next/link';
+export default function Page(){return <main className="standalone"><div className="topline"><div><p>SSMA • INTELIGÊNCIA</p><h1>Indicadores</h1></div><Link className="btnlink" href="/">Voltar ao Dashboard</Link></div><section className="panel"><h2>Indicadores de Segurança</h2><p className="description">Área preparada para frequência, gravidade, recorrência, causas, evolução temporal e demais KPIs do SENTINEL. Os indicadores serão alimentados pelos registros consolidados no banco D1.</p></section></main>}
