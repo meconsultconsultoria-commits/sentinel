@@ -14,6 +14,16 @@ export async function ensureAuthSchema(db:any){
   await db.prepare("CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token_hash)").run();
   await db.prepare("CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id)").run();
   try{await db.prepare("ALTER TABLE users ADD COLUMN password_hash TEXT").run()}catch{}
+  await db.prepare("CREATE TABLE IF NOT EXISTS system_migrations(id TEXT PRIMARY KEY,applied_at TEXT DEFAULT CURRENT_TIMESTAMP)").run();
+  const resetId="RESET_ALL_PASSWORDS_20260918_01";
+  const done=await db.prepare("SELECT id FROM system_migrations WHERE id=?").bind(resetId).first();
+  if(!done){
+    await db.batch([
+      db.prepare("UPDATE users SET password_hash=NULL"),
+      db.prepare("DELETE FROM sessions"),
+      db.prepare("INSERT INTO system_migrations(id) VALUES(?)").bind(resetId)
+    ]);
+  }
 }
 
 export async function hashPassword(password:string){
