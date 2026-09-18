@@ -72,3 +72,19 @@ export async function getCurrentUser(req:Request):Promise<SessionUser|null>{
 }
 export async function destroySession(req:Request){const db=getDB();await ensureAuthSchema(db);const token=cookie(req,"sentinel_session");if(token)await db.prepare("DELETE FROM sessions WHERE token_hash=?").bind(await sha256(token)).run()}
 export async function authorize(req:Request,roles?:string[]){const user=await getCurrentUser(req);if(!user)return {user:null,response:Response.json({error:"unauthorized"},{status:401})};if(roles&&!roles.includes(user.role))return {user,response:Response.json({error:"forbidden"},{status:403})};return {user,response:null}}
+
+export function scopeFilter(user:SessionUser,alias="o"){
+  const where:string[]=[];const values:any[]=[];
+  if(user.role!=="ADMIN"&&user.companyId){where.push(alias+".company_id=?");values.push(user.companyId)}
+  if(user.role!=="ADMIN"&&user.unitId){where.push(alias+".unit_id=?");values.push(user.unitId)}
+  return {sql:where.length?" AND "+where.join(" AND "):"",values};
+}
+export async function canAccessOccurrence(db:any,user:SessionUser,id:string){
+  if(user.role==="ADMIN")return true;
+  const s=scopeFilter(user,"o");
+  const r=await db.prepare("SELECT o.id FROM occurrences o WHERE o.id=?"+s.sql).bind(id,...s.values).first();
+  return !!r;
+}
+export async function audit(db:any,userId:string|null,event:string,details:string,occurrenceId:string|null=null){
+  try{await db.prepare("INSERT INTO audit_log(occurrence_id,user_id,event,details) VALUES(?,?,?,?)").bind(occurrenceId,userId,event,details).run()}catch{}
+}
