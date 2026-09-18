@@ -1,4 +1,4 @@
-import{createSession,ensureAuthSchema,getDB,hashPassword,sessionCookie}from'../../../../lib/auth-server';export const runtime='nodejs';export const dynamic='force-dynamic';
+import{audit,createSession,ensureAuthSchema,getDB,hashPassword,sessionCookie}from'../../../../lib/auth-server';export const runtime='nodejs';export const dynamic='force-dynamic';
 export async function POST(req:Request){
   try{
     const db=getDB();await ensureAuthSchema(db);
@@ -12,7 +12,7 @@ export async function POST(req:Request){
     const id=existing?.id||("USR-"+crypto.randomUUID());
     if(existing)await db.prepare("UPDATE users SET name=?,role='ADMIN',active=1,password_hash=? WHERE id=?").bind(name,hash,id).run();
     else await db.prepare("INSERT INTO users(id,email,name,role,company_id,unit_id,active,password_hash) VALUES(?,?,?,'ADMIN',NULL,NULL,1,?)").bind(id,email,name,hash).run();
-    const s=await createSession(db,id);
+    await audit(db,id,'Administrador inicial criado','Primeiro administrador configurado no SENTINEL');const s=await createSession(db,id);
     return new Response(JSON.stringify({ok:true}),{status:201,headers:{'content-type':'application/json','set-cookie':sessionCookie(s.token)}});
   }catch(e:any){
     return Response.json({error:'setup_failed',detail:String(e?.message||e||'unknown')},{status:500});
