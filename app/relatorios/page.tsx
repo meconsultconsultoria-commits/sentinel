@@ -1,0 +1,2 @@
+import Link from 'next/link';
+export default function Page(){return <main className="standalone"><div className="topline"><div><p>SSMA • GESTÃO</p><h1>Relatórios</h1></div><Link className="btnlink" href="/">Voltar ao Dashboard</Link></div><section className="panel"><h2>Central de Relatórios</h2><p className="description">Área destinada aos relatórios individuais de ocorrência e relatórios gerenciais de SSMA, com futura exportação em PDF e Excel.</p></section></main>}
