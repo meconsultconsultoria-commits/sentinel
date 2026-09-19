@@ -22,19 +22,36 @@ export async function GET(req:Request){
     const email=String(incoming.email).trim().toLowerCase();
     const name=String(incoming.name||email);
     const role=["ADMIN","SSMA","GESTOR","CONSULTA"].includes(incoming.role)?incoming.role:"CONSULTA";
+    const companyId=incoming.companyId?String(incoming.companyId):null;
+    const companyName=incoming.companyName?String(incoming.companyName):null;
+    const unitId=incoming.unitId?String(incoming.unitId):null;
+    const unitName=incoming.unitName?String(incoming.unitName):null;
+
+    if(companyId&&companyName){
+      await db.prepare("INSERT INTO companies(id,name,active) VALUES(?,?,1) ON CONFLICT(id) DO UPDATE SET name=excluded.name,active=1")
+        .bind(companyId,companyName).run();
+    }
+    if(companyId&&unitId&&unitName){
+      await db.prepare("INSERT INTO units(id,company_id,name,active) VALUES(?,?,?,1) ON CONFLICT(id) DO UPDATE SET company_id=excluded.company_id,name=excluded.name,active=1")
+        .bind(unitId,companyId,unitName).run();
+    }
 
     let u=await db.prepare("SELECT id FROM users WHERE email=? LIMIT 1").bind(email).first();
-    let id=String(u?.id||("USR-"+crypto.randomUUID()));
+    const id=String(u?.id||("USR-"+crypto.randomUUID()));
+    const scopedCompany=role==="ADMIN"?companyId:companyId;
+    const scopedUnit=companyId&&unitId?unitId:null;
 
     if(u){
-      await db.prepare("UPDATE users SET name=?,role=?,active=1 WHERE id=?").bind(name,role,id).run();
+      await db.prepare("UPDATE users SET name=?,role=?,company_id=?,unit_id=?,active=1 WHERE id=?")
+        .bind(name,role,scopedCompany,scopedUnit,id).run();
     }else{
-      await db.prepare("INSERT INTO users(id,email,name,role,company_id,unit_id,active,password_hash) VALUES(?,?,?,?,NULL,NULL,1,NULL)")
-        .bind(id,email,name,role).run();
+      await db.prepare("INSERT INTO users(id,email,name,role,company_id,unit_id,active,password_hash) VALUES(?,?,?,?,?,?,1,NULL)")
+        .bind(id,email,name,role,scopedCompany,scopedUnit).run();
     }
 
     const s=await createSession(db,id);
-    await audit(db,id,"Login SSO","Sessão autenticada via ME Safety");
+    const scopeText=companyName?(companyName+(unitName?" / "+unitName:"")):"Sem restrição organizacional";
+    await audit(db,id,"Login SSO","Sessão autenticada via ME Safety · "+scopeText);
 
     return new Response(null,{
       status:302,
@@ -44,7 +61,7 @@ export async function GET(req:Request){
         "cache-control":"no-store"
       }
     });
-  }catch(e){
+  }catch{
     return Response.redirect(new URL("/login?sso=error",req.url),302);
   }
 }
