@@ -20,7 +20,7 @@ export async function POST(req:Request){
     if(u.role!=="ADMIN"&&u.unitId){where.push("o.unit_id=?");vals.push(u.unitId)}
     const scope=where.join(" AND ");
 
-    const [occ,actions,potential,nature]=await Promise.all([
+    const [occ,actions,potential,nature,openItems,overdueItems]=await Promise.all([
       db.prepare(`SELECT
         COUNT(*) total,
         SUM(CASE WHEN o.status IN ('Encerrado','Concluído','Concluido','Fechado') THEN 1 ELSE 0 END) closed,
@@ -34,7 +34,9 @@ export async function POST(req:Request){
         SUM(CASE WHEN a.deadline IS NOT NULL AND date(a.deadline)<date('now') AND COALESCE(a.status,'') NOT IN ('Concluída','Concluida','Concluído','Concluido','Fechada','Fechado') THEN 1 ELSE 0 END) overdue
         FROM actions a JOIN occurrences o ON o.id=a.occurrence_id WHERE ${scope}`).bind(...vals).first(),
       db.prepare(`SELECT COALESCE(o.potential,'Não informado') label,COUNT(*) value FROM occurrences o WHERE ${scope} GROUP BY COALESCE(o.potential,'Não informado') ORDER BY value DESC LIMIT 6`).bind(...vals).all(),
-      db.prepare(`SELECT COALESCE(o.nature,'Não informado') label,COUNT(*) value FROM occurrences o WHERE ${scope} GROUP BY COALESCE(o.nature,'Não informado') ORDER BY value DESC LIMIT 6`).bind(...vals).all()
+      db.prepare(`SELECT COALESCE(o.nature,'Não informado') label,COUNT(*) value FROM occurrences o WHERE ${scope} GROUP BY COALESCE(o.nature,'Não informado') ORDER BY value DESC LIMIT 6`).bind(...vals).all(),
+      db.prepare(`SELECT o.id,o.date,o.time,o.nature,o.potential,o.status,o.city,o.uf,c.name company_name,u.name unit_name,o.created_at FROM occurrences o LEFT JOIN companies c ON c.id=o.company_id LEFT JOIN units u ON u.id=o.unit_id WHERE ${scope} AND o.status NOT IN ('Encerrado','Concluído','Concluido','Fechado') ORDER BY COALESCE(o.date,o.created_at) DESC,o.created_at DESC LIMIT 6`).bind(...vals).all(),
+      db.prepare(`SELECT a.id,a.occurrence_id,a.description,a.responsible,a.deadline,a.priority,a.status,o.nature,o.potential,c.name company_name,u.name unit_name FROM actions a JOIN occurrences o ON o.id=a.occurrence_id LEFT JOIN companies c ON c.id=o.company_id LEFT JOIN units u ON u.id=o.unit_id WHERE ${scope} AND a.deadline IS NOT NULL AND date(a.deadline)<date('now') AND COALESCE(a.status,'') NOT IN ('Concluída','Concluida','Concluído','Concluido','Fechada','Fechado') ORDER BY date(a.deadline) ASC LIMIT 6`).bind(...vals).all()
     ]);
 
     return Response.json({
@@ -45,7 +47,8 @@ export async function POST(req:Request){
         last30:Number(occ?.last30||0),classified:Number(occ?.classified||0)
       },
       actions:{total:Number(actions?.total||0),pending:Number(actions?.pending||0),overdue:Number(actions?.overdue||0)},
-      byPotential:potential.results||[],byNature:nature.results||[]
+      byPotential:potential.results||[],byNature:nature.results||[],
+      priority:{openOccurrences:openItems.results||[],overdueActions:overdueItems.results||[]}
     });
   }catch(e:any){
     return Response.json({error:"summary_failed",detail:String(e?.message||e||"unknown")},{status:500});
